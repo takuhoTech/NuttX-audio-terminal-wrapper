@@ -15,6 +15,7 @@ void NuttX::init(Stream &stream)
 
 int NuttX::play(String filename)
 {
+  while (interval_play > millis() - lasttime_play);
   String temp = "play ";
   temp.concat(filename);
   do {
@@ -22,15 +23,16 @@ int NuttX::play(String filename)
     str = _serial->readStringUntil('>');
   } while (str.lastIndexOf("nxplayer") == -1);
 
-  if (str.lastIndexOf("Audio device busy") != -1)
+  lasttime_play = millis();
+  if (str.lastIndexOf("busy") != -1)//Audio device busy
   {
-    return 0;
+    return 1;
   }
   else if (str.lastIndexOf("not found") != -1)
   {
     return -1;
   }
-  return 1;
+  return 0;
 }
 
 void NuttX::stop()
@@ -39,4 +41,36 @@ void NuttX::stop()
     _serial->println("stop");
     str = _serial->readStringUntil('>');
   } while (str.lastIndexOf("nxplayer") == -1);
+}
+
+void NuttX::pause()
+{
+  do {
+    _serial->println("pause");
+    str = _serial->readStringUntil('>');
+  } while (str.lastIndexOf("nxplayer") == -1);
+}
+
+void NuttX::resume()
+{
+  do {
+    _serial->println("resume");
+    str = _serial->readStringUntil('>');
+  } while (str.lastIndexOf("nxplayer") == -1);
+}
+
+bool NuttX::isplaying()
+{
+  while (interval_play > millis() - lasttime_play);
+  do {
+    _serial->println("play");
+    str = _serial->readStringUntil('>');
+  } while (str.lastIndexOf("nxplayer") == -1);
+
+  lasttime_play = millis();
+  if (str.lastIndexOf("busy") != -1)//Audio device busy
+  {
+    return 1;
+  }
+  return 0;
 }

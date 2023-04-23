@@ -5,13 +5,17 @@
 class NuttX
 {
   public:
-    Stream* _serial;
-    String str;
     void init(Stream &stream);
     int play(String filename);
     void stop();
-    void resume();
     void pause();
+    void resume();
+    bool isplaying();
+  private:
+    Stream* _serial;
+    String str;
+    unsigned long lasttime_play = 0;
+    unsigned long interval_play = 100;
 };
 
 #endif
